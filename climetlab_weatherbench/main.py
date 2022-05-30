@@ -11,11 +11,11 @@ import climetlab as cml
 from climetlab import Dataset
 from climetlab.decorators import normalize
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
 
-PATTERN = "{url}/WeatherBench/" "{parameter}_{year}_5.625deg.nc"
+PATTERN = "{url}/WeatherBench/{parameter}hPa_{year}_5.625deg.nc"
 
 
 class Main(Dataset):
@@ -45,7 +45,82 @@ class Main(Dataset):
 
     dataset = None
 
-    @normalize("parameter", ["geopotential_500hPa", "temperature_850hPa"])
-    def __init__(self, year, parameter):
+    @normalize("parameter", ["geopotential_500", "temperature_850"])
+    def __init__(self, year, parameter, grid=5.625):
         request = dict(parameter=parameter, url=URL, year=year)
-        self.source = cml.load_source("url-pattern", PATTERN, request)
+
+        if grid == 5.625 and year in range(1979, 2019):
+            self.source = cml.load_source("url-pattern", PATTERN, request)
+        else:
+            request = {
+                "product_type": "reanalysis",
+                "format": "netcdf",
+                "year": f"{year}",
+                "month": [
+                    "01",
+                    "02",
+                    "03",
+                    "04",
+                    "05",
+                    "06",
+                    "07",
+                    "08",
+                    "09",
+                    "10",
+                    "11",
+                    "12",
+                ],
+                "day": [
+                    "01",
+                    "02",
+                    "03",
+                    "04",
+                    "05",
+                    "06",
+                    "07",
+                    "08",
+                    "09",
+                    "10",
+                    "11",
+                    "12",
+                    "13",
+                    "14",
+                    "15",
+                    "16",
+                    "17",
+                    "18",
+                    "19",
+                    "20",
+                    "21",
+                    "22",
+                    "23",
+                    "24",
+                    "25",
+                    "26",
+                    "27",
+                    "28",
+                    "29",
+                    "30",
+                    "31",
+                ],
+                "time": [
+                    "00:00",
+                    "06:00",
+                    "12:00",
+                    "18:00",
+                ],
+                "grid": [grid, grid],
+            }
+            if "_" in parameter:
+                param_split = parameter.split("_")
+                variable = param_split[0]
+                level = param_split[1]
+                request["pressure_level"] = level
+                cds_source = "reanalysis-era5-pressure-levels"
+            else:
+                variable = parameter
+                cds_source = "reanalysis-era5-single-levels"
+            request["variable"] = variable
+
+            self.source = cml.load_source("cds", cds_source, request)
+        return
