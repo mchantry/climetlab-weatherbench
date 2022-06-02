@@ -156,9 +156,20 @@ class Main(Dataset):
     def __init__(self, year, parameter, grid=5.625):
         sources = []
         for p in parameter:
+
+            sources_many_years = []
             for y in year:
-                sources += self._get_sources(y, p, grid)
+                sources_many_years += self._get_sources(y, p, grid)
+            sources.append(
+                MultiSource(
+                    sources_many_years,
+                    merger="concat(dim=time)",
+                )
+            )
+
+        # Merging manually latter because we need special option to merge
         self.source = MultiSource(sources)
+        # self.source = MultiSource(sources, merge='merge()')
 
     def _get_sources(self, year, p, grid) -> list:
         for cls in [UrlRequest, CDSRequest]:
@@ -168,22 +179,16 @@ class Main(Dataset):
                 LOG.debug(str(e))
                 continue
 
-            if hasattr(s, "sources"):  # this is to bypass the multisource merge
-                assert isinstance(s, MultiSource), s
+            # this hack is to bypass the multisource merge
+            if isinstance(s, MultiSource):
                 return s.sources
             else:
-                assert not isinstance(s, MultiSource), s
                 return [s]
 
         LOG.error("Cannot find data for ", year, p, grid)
         return []  # or raise exception ?
 
     def to_xarray(self, **kwargs):
-        if isinstance(self.source, MultiSource):
-            print("now merging these:")
-            for s in self.source.sources:
-                print(s)
-
         options = dict(xarray_open_mfdataset_kwargs=dict(compat="override"))
         options.update(kwargs)
         ds = self.source.to_xarray(**options)
