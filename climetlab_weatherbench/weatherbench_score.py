@@ -4,7 +4,8 @@ Functions for evaluating forecasts.
 import numpy as np
 import xarray as xr
 
-def load_test_data(path, var, years=slice('2017', '2018')):
+
+def load_test_data(path, var, years=slice("2017", "2018")):
     """
     Load the test dataset. If z return z500, if t return t850.
     Args:
@@ -15,16 +16,19 @@ def load_test_data(path, var, years=slice('2017', '2018')):
     Returns:
         dataset: Concatenated dataset for 2017 and 2018
     """
-    ds = xr.open_mfdataset(f'{path}/*.nc', combine='by_coords')[var]
-    if var in ['z', 't']:
+    ds = xr.open_mfdataset(f"{path}/*.nc", combine="by_coords")[var]
+    if var in ["z", "t"]:
         if len(ds["level"].dims) > 0:
             try:
-                ds = ds.sel(level=500 if var == 'z' else 850) .drop('level')
+                ds = ds.sel(level=500 if var == "z" else 850).drop("level")
             except ValueError:
-                ds = ds.drop('level')
+                ds = ds.drop("level")
         else:
-            assert ds["level"].values == 500 if var == 'z' else ds["level"].values == 850
+            assert (
+                ds["level"].values == 500 if var == "z" else ds["level"].values == 850
+            )
     return ds.sel(time=years)
+
 
 def compute_weighted_rmse(da_fc, da_true, mean_dims=xr.ALL_DIMS):
     """
@@ -40,8 +44,9 @@ def compute_weighted_rmse(da_fc, da_true, mean_dims=xr.ALL_DIMS):
     error = da_fc - da_true
     weights_lat = np.cos(np.deg2rad(error.lat))
     weights_lat /= weights_lat.mean()
-    rmse = np.sqrt(((error)**2 * weights_lat).mean(mean_dims))
+    rmse = np.sqrt(((error) ** 2 * weights_lat).mean(mean_dims))
     return rmse
+
 
 def compute_weighted_acc(da_fc, da_true, mean_dims=xr.ALL_DIMS):
     """
@@ -56,7 +61,7 @@ def compute_weighted_acc(da_fc, da_true, mean_dims=xr.ALL_DIMS):
         acc: Latitude weighted acc
     """
 
-    clim = da_true.mean('time')
+    clim = da_true.mean("time")
     try:
         t = np.intersect1d(da_fc.time, da_true.time)
         fa = da_fc.sel(time=t) - clim
@@ -72,13 +77,11 @@ def compute_weighted_acc(da_fc, da_true, mean_dims=xr.ALL_DIMS):
     fa_prime = fa - fa.mean()
     a_prime = a - a.mean()
 
-    acc = (
-            np.sum(w * fa_prime * a_prime) /
-            np.sqrt(
-                np.sum(w * fa_prime ** 2) * np.sum(w * a_prime ** 2)
-            )
+    acc = np.sum(w * fa_prime * a_prime) / np.sqrt(
+        np.sum(w * fa_prime**2) * np.sum(w * a_prime**2)
     )
     return acc
+
 
 def compute_weighted_mae(da_fc, da_true, mean_dims=xr.ALL_DIMS):
     """
@@ -110,8 +113,6 @@ def evaluate_iterative_forecast(da_fc, da_true, func, mean_dims=xr.ALL_DIMS):
     rmses = []
     for f in da_fc.lead_time:
         fc = da_fc.sel(lead_time=f)
-        fc['time'] = fc.time + np.timedelta64(int(f), 'h')
+        fc["time"] = fc.time + np.timedelta64(int(f), "h")
         rmses.append(func(fc, da_true, mean_dims))
-    return xr.concat(rmses, 'lead_time')
-
-
+    return xr.concat(rmses, "lead_time")
