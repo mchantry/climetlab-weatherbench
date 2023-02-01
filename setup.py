@@ -51,7 +51,10 @@ setuptools.setup(
         "climetlab.datasets": [
             # End-users will use cml.load_dataset("weatherbench", ...)
             # see the tests/ folder for a example.
-            "weatherbench= climetlab_weatherbench.main:Main",  # noqa: E501
+            "weatherbench = climetlab_weatherbench.main:Main",  # noqa: E501
+            "weatherbench-extended = climetlab_weatherbench.extended:WeatherbenchExtended",  # noqa: E501
+            "weatherbench-extended-mars = climetlab_weatherbench.extended:WeatherbenchExtendedMARS",  # noqa: E501
+            "weatherbench-extended-cds = climetlab_weatherbench.extended:WeatherbenchExtendedCDS",  # noqa: E501
             # Other datasets can be included here
             # "weatherbench-dataset-2= climetlab_weatherbench.main2:Main2",  # noqa: E501
         ]

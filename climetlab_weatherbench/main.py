@@ -13,62 +13,16 @@ import climetlab as cml
 from climetlab import Dataset
 from climetlab.decorators import normalize
 from climetlab.sources.multi import MultiSource
+from .common import ALL_DAYS, ALL_MONTHS
 
 LOG = logging.getLogger(__name__)
 
-__version__ = "0.2.0"
+from . import __version__
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
 
 PATTERN = "{url}/WeatherBench/{parameter}hPa_{year}_5.625deg.nc"
 
-ALL_MONTHS = [
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10",
-    "11",
-    "12",
-]
-ALL_DAYS = [
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-    "17",
-    "18",
-    "19",
-    "20",
-    "21",
-    "22",
-    "23",
-    "24",
-    "25",
-    "26",
-    "27",
-    "28",
-    "29",
-    "30",
-    "31",
-]
 
 
 class Request:
@@ -170,7 +124,7 @@ class Main(Dataset):
         # Merging manually latter because we need special option to merge
         self.source = MultiSource(sources)
         # self.source = MultiSource(sources, merge='merge()')
-
+    
     def _get_sources(self, year, p, grid) -> list:
         for cls in [UrlRequest, CDSRequest]:
             try:
@@ -192,6 +146,7 @@ class Main(Dataset):
         options = dict(xarray_open_mfdataset_kwargs=dict(compat="override"))
         options.update(kwargs)
         ds = self.source.to_xarray(**options)
+        
         if "level" in ds.variables:
             ds = ds.drop("level")
         return ds
