@@ -97,12 +97,12 @@ class Extended(Dataset):
             sources.append(
                 MultiSource(
                     [self.build_source(y, param, level, grid, timestep) for y in year],
-                    merger="concat(dim=time)",
-                )
+                    #merger="concat(dim=time)",
+                ).mutate()
             )
 
         # Merging manually latter because we need special option to merge
-        self.source = MultiSource(sources)
+        self.source = MultiSource(sources).mutate()
         # self.source = MultiSource(sources, merge='merge()')
 
     def parse_parameter_level(self, parameter_level=None, parameter=None, level=None):

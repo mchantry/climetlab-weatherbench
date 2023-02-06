@@ -54,6 +54,8 @@ In applying this licence, ECMWF does not waive the privileges and immunities
 granted to it by virtue of its status as an intergovernmental organisation
 nor does it submit to any jurisdiction.
 
+Some material have been taken from https://github.com/pangeo-data/WeatherBench.git
+
 Authors
 -------
 
