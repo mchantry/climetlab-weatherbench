@@ -11,11 +11,11 @@ import climetlab as cml
 from climetlab import Dataset
 from climetlab.decorators import normalize
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
-URL = "https://storage.ecmwf.europeanweather.cloud"
+URL = "https://object-store.os-api.cci1.ecmwf.int"
 
-PATTERN = "{url}/WeatherBench/" "{parameter}_{year}_5.625deg.nc"
+PATTERN = "{url}/weatherbench/" "{parameter}_{year}_5.625deg.nc"
 
 
 class Main(Dataset):
